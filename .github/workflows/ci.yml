@@ -48,6 +48,7 @@ jobs:
       VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
       VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
       VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID }}
+      PRODUCTION_URL: ${{ vars.PRODUCTION_URL }}
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
 
@@ -69,7 +70,7 @@ jobs:
       - name: Deploy
         run: vercel deploy --prebuilt --prod
 
-      - name: Smoke test
+      - name: Wait for new version
         run: |
           for _ in $(seq 1 10); do
             if curl -fsS "$PRODUCTION_URL/api/health" | grep -q "$GITHUB_SHA"; then
@@ -80,5 +81,7 @@ jobs:
           done
           echo "::error::$PRODUCTION_URL/api/health does not report commit $GITHUB_SHA"
           exit 1
-        env:
-          PRODUCTION_URL: ${{ vars.PRODUCTION_URL }}
+
+      # /api/health doesn't render the page, so a broken home page would pass the check above
+      - name: Check home page
+        run: curl -fsS -o /dev/null "$PRODUCTION_URL/"
