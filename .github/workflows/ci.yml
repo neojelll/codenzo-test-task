@@ -44,8 +44,8 @@ jobs:
     environment:
       name: production
       url: ${{ vars.PRODUCTION_URL }}
+    # Token goes only to steps that call the Vercel API, so npm install scripts never see it
     env:
-      VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
       VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
       VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID }}
       PRODUCTION_URL: ${{ vars.PRODUCTION_URL }}
@@ -61,6 +61,8 @@ jobs:
 
       - name: Pull Vercel project settings
         run: vercel pull --yes --environment=production
+        env:
+          VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
 
       - name: Build
         run: vercel build --prod
@@ -69,6 +71,8 @@ jobs:
 
       - name: Deploy
         run: vercel deploy --prebuilt --prod
+        env:
+          VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
 
       - name: Wait for new version
         run: |
