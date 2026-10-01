@@ -3,6 +3,10 @@ name: CI/CD
 on:
   push:
     branches: [main]
+    # Docs-only changes don't need a redeploy. Not applied to pull_request:
+    # `check` is a required status, and a skipped run would block the merge
+    paths-ignore:
+      - "**.md"
   pull_request:
 
 # One run per branch; a newer push to a PR cancels the stale run,
